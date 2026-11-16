@@ -1,0 +1,93 @@
+# Builds the standalone PlaceHolder program on Ubuntu 22.04, so that it runs on
+# any Linux with a similar or newer glibc (Ubuntu 22.04 or newer, Linux Mint 21
+# or newer, Debian 12 or newer and so on).
+#
+# Two ways to run it:
+#   1. Manually: GitHub > Actions > "Build Linux release" > Run workflow.
+#      The .tar.gz is attached to the run as a download (an "artifact").
+#   2. By pushing a version tag, such as v1.0. The .tar.gz is built and
+#      attached to a GitHub Release for that tag automatically.
+
+name: Build Linux release
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+
+    steps:
+      - name: Get the code
+        uses: actions/checkout@v6
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+
+      - name: Install the system libraries Qt needs
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            libxcb-cursor0 libxcb-icccm4 libxcb-image0 libxcb-keysyms1 \
+            libxcb-randr0 libxcb-render-util0 libxcb-shape0 libxcb-xinerama0 \
+            libxkbcommon-x11-0 libegl1 libgl1 libdbus-1-3 libfontconfig1
+
+      - name: Set up the virtual environment (build.sh expects ./venv)
+        run: |
+          python -m venv venv
+          ./venv/bin/pip install --upgrade pip
+          ./venv/bin/pip install -r requirements.txt pyinstaller
+
+      - name: Work out the version
+        id: ver
+        run: |
+          VERSION=$(grep -oP 'APP_VERSION = "\K[^"]+' placeholder.py)
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "PlaceHolder version in placeholder.py: $VERSION"
+          # A tag must match the version in the program, so a release is never
+          # labelled with the wrong number
+          if [ "$GITHUB_REF_TYPE" = "tag" ] && [ "$GITHUB_REF_NAME" != "v$VERSION" ]; then
+            echo "ERROR: tag $GITHUB_REF_NAME does not match APP_VERSION $VERSION in placeholder.py"
+            exit 1
+          fi
+
+      - name: Build the program
+        run: ./build.sh
+
+      - name: Check that the program starts
+        run: |
+          # Run it without a screen. If it is still running after 15 seconds
+          # it started properly; if it stops sooner, something is missing.
+          set +e
+          QT_QPA_PLATFORM=offscreen timeout 15 ./dist/placeholder
+          status=$?
+          if [ "$status" -eq 124 ]; then
+            echo "The program started and kept running: OK"
+            exit 0
+          fi
+          echo "ERROR: the program stopped with status $status"
+          exit 1
+
+      - name: Pack the release
+        run: ./make-release.sh "${{ steps.ver.outputs.version }}"
+
+      - name: Keep the download with this run
+        uses: actions/upload-artifact@v6
+        with:
+          name: placeholder-linux-v${{ steps.ver.outputs.version }}
+          path: release/placeholder-linux-v${{ steps.ver.outputs.version }}.tar.gz
+          if-no-files-found: error
+
+      - name: Attach it to the GitHub Release (tag pushes only)
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v3
+        with:
+          files: release/placeholder-linux-v${{ steps.ver.outputs.version }}.tar.gz

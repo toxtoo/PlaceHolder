@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256">
+  <!-- PlaceHolder icon: a grey placeholder card with a cross, in front of a
+       tilted second card. Each card has a dark edge with a thin light rim
+       outside it, so the icon shows up on dark and light backgrounds. -->
+  <defs>
+    <linearGradient id="front" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#e2e2e2"/>
+      <stop offset="1" stop-color="#c6c6c6"/>
+    </linearGradient>
+  </defs>
+  <!-- the card behind, tilted -->
+  <g transform="rotate(14 132 134)">
+    <rect x="42" y="44" width="180" height="180" rx="11" fill="none" stroke="#efefef" stroke-width="20"/>
+    <rect x="42" y="44" width="180" height="180" rx="11" fill="#a0a0a0" stroke="#222" stroke-width="10"/>
+  </g>
+  <!-- the front card -->
+  <rect x="24" y="20" width="186" height="186" rx="10" fill="none" stroke="#efefef" stroke-width="22"/>
+  <rect x="24" y="20" width="186" height="186" rx="10" fill="url(#front)" stroke="#222" stroke-width="11"/>
+  <!-- the cross -->
+  <path d="M33 29 L201 197 M201 29 L33 197" stroke="#555" stroke-width="8" stroke-linecap="round"/>
+</svg>
