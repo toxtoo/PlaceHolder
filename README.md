@@ -8,6 +8,7 @@ PlaceHolder is a small Linux program that makes plain placeholder images: a soli
 
 It works offline, so there's no need for a placeholder website, and the images are saved with your site.
 
+<img src="icons/placeholder.png" width="784" alt="PlaceHolder icon">
 ---
 
 ## Features
