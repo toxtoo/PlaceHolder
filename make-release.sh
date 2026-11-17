@@ -3,11 +3,11 @@
 # Packs the built PlaceHolder into one download for GitHub Releases.
 # Run it after ./build.sh has finished:
 #
-#   ./make-release.sh 1.0      makes release/placeholder-linux-v1.0.tar.gz
+#   ./make-release.sh 1.1      makes release/placeholder-linux-v1.1.tar.gz
 
 set -e
 
-VERSION="${1:-1.0}"
+VERSION="${1:-1.1}"
 NAME="placeholder-linux-v$VERSION"
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 

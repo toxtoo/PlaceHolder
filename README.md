@@ -4,7 +4,7 @@
 
 **Placeholder images for web pages, made on your own computer.**
 
-PlaceHolder is a small Linux program that makes plain placeholder images: a solid colour with the size, or your own words, in the middle. Use them to lay out a web page before the real pictures are ready, then swap the real ones in later.
+PlaceHolder is a small Linux program that makes plain placeholder images: a solid colour with the size, your own words or a soft outlined icon in the middle, with square, rounded or round corners. Use them to lay out a web page before the real pictures are ready, then swap the real ones in later.
 
 It works offline, so there's no need for a placeholder website, and the images are saved with your site.
 
@@ -15,10 +15,13 @@ It works offline, so there's no need for a placeholder website, and the images a
 - Any size from 1 to 8000 pixels, or pick one from a list of common sizes
 - Your choice of background and text colour
 - The text shows the size, such as **640 × 480**, or your own words, such as *Hero image*. It sizes itself to fit
+- Or an **icon** instead of text: Picture, Camera, Person, Video, Document, Map pin, Calendar, Speech bubble, Envelope, Music, Shopping bag, Heart or Star, or **Random** with a **New icon** button to try another. The icon is drawn in soft shades of the background (or in your text colour), with the size underneath if you like
+- **Rounded corners** of any size, or **Round** for a circle on a square image, such as a 64 × 64 avatar. The corners outside the curve are see-through in PNG and SVG
 - An optional border with diagonal lines, the classic placeholder look
-- A live preview as you change things
+- A live preview as you change things, with a checkerboard behind it to show any see-through corners
 - Saves as **PNG**, **JPEG** or **SVG**:
-  - PNG is the default and works in every browser
+  - PNG is the default and works in every browser, see-through corners included
+  - JPEG can't be see-through, so any rounded corners are filled with white
   - SVG is tiny and stays sharp at any size
 - **Copy `<img>` Tag** copies a ready-made tag, with the width and height, for the image you just saved
 - Remembers your last size, colours, text and folder
@@ -42,10 +45,10 @@ The standalone build is for 64-bit Linux and includes everything it needs, so yo
 
 ### Option 2: run from source
 
-You need Python 3 and PyQt6:
+You need Python 3 and PyQt6, including its SVG part:
 
 ```
-sudo apt install python3-pyqt6
+sudo apt install python3-pyqt6 python3-pyqt6.qtsvg
 python3 placeholder.py
 ```
 
@@ -63,10 +66,15 @@ python3 -m venv venv
 
 1. Set the width and height, or choose from **Common sizes**.
 2. Click **Background** and **Text colour** to pick the colours.
-3. Leave **Text** empty to show the size, or type your own.
-4. Tick **Border and diagonal lines** if you'd like them.
-5. Click **Save Image...** and choose PNG, JPEG or SVG from the file type list. The name suggested is like `placeholder-640x480.png`.
-6. Click **Copy `<img>` Tag** and paste the tag into your page.
+3. For rounded corners, set **Corner radius**, or tick **Round** for a circle.
+4. Under **Show**, choose **Text** or **Icon**:
+   - **Text:** leave the box empty to show the size, or type your own words.
+   - **Icon:** pick one from the list, or choose **Random** and click **New icon** until one suits. Tick **Show the size under the icon** if you want it.
+5. Tick **Border and diagonal lines** if you'd like them.
+6. Click **Save Image...** and choose PNG, JPEG or SVG from the file type list. The name suggested is like `placeholder-640x480.png`.
+7. Click **Copy `<img>` Tag** and paste the tag into your page.
+
+To add an icon of your own, add an entry to `ICONS` near the top of `placeholder.py`: each icon is a few lines of SVG on a 96 × 96 grid.
 
 When an SVG is shown in a browser, its text uses Arial or Helvetica, whichever the visitor has, so the lettering may look slightly different from the preview. The size and position stay the same.
 
@@ -86,12 +94,12 @@ From the project folder:
 python3 -m venv venv
 ./venv/bin/pip install -r requirements.txt pyinstaller
 ./build.sh
-./make-release.sh 1.0
+./make-release.sh 1.1
 ```
 
-This creates `release/placeholder-linux-v1.0.tar.gz`.
+This creates `release/placeholder-linux-v1.1.tar.gz`.
 
-Pushing a version tag, such as `v1.0`, to GitHub builds the release automatically on Ubuntu 22.04 and attaches the download to a GitHub Release. The tag must match `APP_VERSION` in `placeholder.py`.
+Pushing a version tag, such as `v1.1`, to GitHub builds the release automatically on Ubuntu 22.04 and attaches the download to a GitHub Release. The tag must match `APP_VERSION` in `placeholder.py`.
 
 ---
 
