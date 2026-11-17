@@ -28,14 +28,14 @@ from PyQt6.QtGui import (
 )
 from PyQt6.QtSvg import QSvgRenderer
 from PyQt6.QtWidgets import (
-    QApplication, QCheckBox, QColorDialog, QComboBox, QFileDialog, QGridLayout,
-    QHBoxLayout, QLabel, QLineEdit, QMessageBox, QPushButton, QSpinBox,
-    QVBoxLayout, QWidget
+    QApplication, QButtonGroup, QCheckBox, QColorDialog, QComboBox, QFileDialog,
+    QGridLayout, QHBoxLayout, QLabel, QLineEdit, QMessageBox, QPushButton,
+    QRadioButton, QSpinBox, QVBoxLayout, QWidget
 )
 
 APP_NAME = "PlaceHolder"
 # Change this for each new release, and use the same number for the tag
-APP_VERSION = "1.1"
+APP_VERSION = "1.2"
 PROJECT_URL = "https://github.com/toxtoo/PlaceHolder"
 
 CONFIG_FILE = Path.home() / ".config" / "PlaceHolder" / "settings.json"
@@ -468,7 +468,26 @@ class PlaceHolderWindow(QWidget):
         self.height_box.setValue(int(settings.get("height", 480)))
         self.height_box.setSuffix(" px")
 
+        # Landscape (wider than tall) or Portrait (taller than wide).
+        # Choosing one turns the image round by swapping width and height.
+        self.landscape_button = QRadioButton("Landscape")
+        self.portrait_button = QRadioButton("Portrait")
+        orientation_group = QButtonGroup(self)
+        orientation_group.addButton(self.landscape_button)
+        orientation_group.addButton(self.portrait_button)
+        self.landscape_button.toggled.connect(self.choose_orientation)
+
+        orientation_row = QHBoxLayout()
+        orientation_row.setContentsMargins(0, 0, 0, 0)
+        orientation_row.addWidget(self.landscape_button)
+        orientation_row.addWidget(self.portrait_button)
+        orientation_row.addStretch()
+
         self.sizes = QComboBox()
+        self.sizes.setToolTip(
+            "Listed as landscape sizes. With Portrait chosen, they are "
+            "turned round (640 x 480 becomes 480 x 640)."
+        )
         self.sizes.addItem("Common sizes...")
         for w, h in COMMON_SIZES:
             self.sizes.addItem(size_text(w, h), (w, h))
@@ -556,6 +575,7 @@ class PlaceHolderWindow(QWidget):
 
         add_row("Width:", self.width_box)
         add_row("Height:", self.height_box)
+        add_row("Orientation:", orientation_row)
         add_row("", self.sizes)
         add_row("Corner radius:", self.corner_box)
         add_row("", self.round_box)
@@ -591,6 +611,17 @@ class PlaceHolderWindow(QWidget):
         # Redraw the preview whenever anything changes
         for spin in (self.width_box, self.height_box, self.corner_box):
             spin.valueChanged.connect(self.update_preview)
+
+        # Typing a size that is taller than wide (or wider than tall) ticks
+        # Portrait (or Landscape) to match
+        self.width_box.valueChanged.connect(self.match_orientation)
+        self.height_box.valueChanged.connect(self.match_orientation)
+
+        # Start with Landscape ticked, unless the size is taller than wide
+        if self.height_box.value() > self.width_box.value():
+            self.portrait_button.setChecked(True)
+        else:
+            self.landscape_button.setChecked(True)
         for box in (self.round_box, self.show_size_box, self.soft_box, self.cross_box):
             box.toggled.connect(self.update_preview)
         self.text_box.textChanged.connect(self.update_preview)
@@ -641,12 +672,53 @@ class PlaceHolderWindow(QWidget):
 
     # ---- Controls ---------------------------------------------------------
 
+    def set_size(self, width, height):
+        """Sets both sizes at once, so the preview is redrawn only once and
+        the orientation buttons aren't confused by the halfway step."""
+        for box, value in ((self.width_box, width), (self.height_box, height)):
+            box.blockSignals(True)
+            box.setValue(value)
+            box.blockSignals(False)
+        self.match_orientation()
+        self.update_preview()
+
     def choose_common_size(self, index):
         size = self.sizes.itemData(index)
         if size:
-            self.width_box.setValue(size[0])
-            self.height_box.setValue(size[1])
+            width, height = size
+            # The list holds landscape sizes: turn them round for Portrait
+            if self.portrait_button.isChecked() and width > height:
+                width, height = height, width
+            self.set_size(width, height)
         self.sizes.setCurrentIndex(0)
+
+    def choose_orientation(self, landscape_ticked=None):
+        """Landscape or Portrait was clicked: swap width and height if the
+        image is the other way round. A square image stays as it is."""
+        width = self.width_box.value()
+        height = self.height_box.value()
+        portrait = self.portrait_button.isChecked()
+
+        if (portrait and width > height) or (not portrait and height > width):
+            self.set_size(height, width)
+
+    def match_orientation(self, value=None):
+        """Ticks Landscape or Portrait to match the size typed in. A square
+        image leaves the choice as it was."""
+        width = self.width_box.value()
+        height = self.height_box.value()
+
+        if width == height:
+            return
+
+        button = self.portrait_button if height > width else self.landscape_button
+
+        if not button.isChecked():
+            for other in (self.landscape_button, self.portrait_button):
+                other.blockSignals(True)
+            button.setChecked(True)
+            for other in (self.landscape_button, self.portrait_button):
+                other.blockSignals(False)
 
     def choose_background(self):
         colour = QColorDialog.getColor(self.background, self, "Background colour")
