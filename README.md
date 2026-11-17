@@ -8,12 +8,14 @@ PlaceHolder is a small Linux program that makes plain placeholder images: a soli
 
 It works offline, so there's no need for a placeholder website, and the images are saved with your site.
 
-<img src="icons/placeholder.png" width="784" alt="PlaceHolder icon">
+<img src="icons/placeholder.png" width="784" alt="PlaceHolder window">
+
 ---
 
 ## Features
 
 - Any size from 1 to 8000 pixels, or pick one from a list of common sizes
+- **Landscape** or **Portrait**: one click turns the image round
 - Your choice of background and text colour
 - The text shows the size, such as **640 × 480**, or your own words, such as *Hero image*. It sizes itself to fit
 - Or an **icon** instead of text: Picture, Camera, Person, Video, Document, Map pin, Calendar, Speech bubble, Envelope, Music, Shopping bag, Heart or Star, or **Random** with a **New icon** button to try another. The icon is drawn in soft shades of the background (or in your text colour), with the size underneath if you like
@@ -65,7 +67,7 @@ python3 -m venv venv
 
 ## Using it
 
-1. Set the width and height, or choose from **Common sizes**.
+1. Set the width and height, or choose from **Common sizes**. Click **Landscape** or **Portrait** to turn the image round. The common sizes are turned to match.
 2. Click **Background** and **Text colour** to pick the colours.
 3. For rounded corners, set **Corner radius**, or tick **Round** for a circle.
 4. Under **Show**, choose **Text** or **Icon**:
@@ -95,12 +97,12 @@ From the project folder:
 python3 -m venv venv
 ./venv/bin/pip install -r requirements.txt pyinstaller
 ./build.sh
-./make-release.sh 1.1
+./make-release.sh 1.2
 ```
 
-This creates `release/placeholder-linux-v1.1.tar.gz`.
+This creates `release/placeholder-linux-v1.2.tar.gz`.
 
-Pushing a version tag, such as `v1.1`, to GitHub builds the release automatically on Ubuntu 22.04 and attaches the download to a GitHub Release. The tag must match `APP_VERSION` in `placeholder.py`.
+Pushing a version tag, such as `v1.2`, to GitHub builds the release automatically on Ubuntu 22.04 and attaches the download to a GitHub Release. The tag must match `APP_VERSION` in `placeholder.py`.
 
 ---
 
